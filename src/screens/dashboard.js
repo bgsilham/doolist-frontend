@@ -1,65 +1,95 @@
   
 import React, {Component} from 'react';
+import io from 'socket.io-client'
+import {connect} from 'react-redux'
+import {getTodo, createTodo, pushTodo} from '../redux/action/todo'
+import {logout} from '../redux/action/auth'
 import {Text, View, FlatList, StyleSheet, Dimensions, TextInput, 
         TouchableOpacity, Alert, ActivityIndicator}
         from 'react-native';
-
+import { getGeneratedNameForNode } from 'typescript';
+const URL = 'http://192.168.56.1:8100'
 const deviceWidth = Dimensions.get('screen').width;
 const deviceHeight = Dimensions.get('screen').height;
 
+
 class Dashboard extends Component {
-  detail = (note, created_at) => {
-    this.props.navigation.navigate('detail', {_note: note, _created_at: created_at})
+  constructor(props){
+    super(props)
+    this.state = {
+      id: this.props.auth.dataLogin.id,
+      note: '',
+      search: '',
+      token: this.props.auth.token
+    }
+  }
+  detail = (note, created_at, id) => {
+    this.props.navigation.navigate('detail', {_note: note, _created_at: created_at, _id:id})
+  }
+  fetchTodo = () => {
+    const {id, search} = this.state
+    
+    this.props.getTodo(id, search).then(() => {
+      this.setState({search: ''})
+    })
+  }
+  postTodo = () => {
+    const dataSubmit = {
+      user: this.state.id,
+      note: this.state.note
+    }
+    const token = this.state.token
+
+    this.props.createTodo(dataSubmit, token).then(() => {
+      this.setState({note: ''})
+    })
+  }
+  signout = () => {
+    this.props.logout()
+  }
+
+  componentDidMount() {
+    this.io = io(`${URL}`)
+    this.io.on('data', (todo) => {
+      this.props.pushTodo(todo)
+    })
+    this.io.on('delete', (todo) => {
+      this.fetchTodo()
+    })
+    this.io.on('update', (todo) => {
+      this.fetchTodo()
+    })
+    this.fetchTodo()
   }
   render() {
-    
-  const data = [
-    {
-      id: 1,
-      note: 'Masak mie',
-      created_at: '08-08-2020 17:53'
-    },
-    {
-      id: 2,
-      note: 'Mengerjakan project',
-      created_at: '08-08-2020 17:53'
-    },
-    {
-      id: 3,
-      note: 'Beli tepung di warung',
-      created_at: '08-08-2020 17:53'
-    },
-    {
-      id: 4,
-      note: 'Mengerjakan project',
-      created_at: '08-08-2020 17:53'
-    },
-    {
-      id: 5,
-      note: 'Beli tepung di warung',
-      created_at: '08-08-2020 17:53'
-    },
-  ]
+  
+    const dataTodo = this.props.todo.dataTodo ? this.props.todo.dataTodo : []
+
     return (
       <>
         <View style={style.fill}>
           <View style={style.headerWrapper}>
             <Text style={style.headerText}>Doolist</Text>
-            <TouchableOpacity style={style.logoutBtn}>
+            <TouchableOpacity style={style.logoutBtn} onPress={this.signout}>
               <Text style={style.logoutText}>logout</Text>
             </TouchableOpacity>
           </View>
           <View style={style.searchWrapper}>
-            <TextInput style={style.searchInput} placeholder='search task' />
-            <TouchableOpacity style={style.searchBtn}>
+            <TextInput 
+              style={style.searchInput} 
+              placeholder='search task' 
+              value={this.state.search}
+              onChangeText={(e) => {this.setState({search: e})}}
+            />
+            <TouchableOpacity style={style.searchBtn} onPress={this.fetchTodo}>
               <Text style={style.logoutText}>search</Text>
             </TouchableOpacity>
           </View>
           <FlatList
-            data={data}
+            data={dataTodo}
             style={style.flatlist}
             renderItem={({item}) => (
-              <TouchableOpacity style={style.todoWrapper} onPress={() => this.detail(item.note, item.created_at)}>
+              <TouchableOpacity style={style.todoWrapper} onPress={() => this.detail(item.note, item.created_at, item.id)}>
                 <Todos
                   note={item.note}
                   created_at={item.created_at}
@@ -68,8 +98,13 @@ class Dashboard extends Component {
             )}
           />
           <View style={style.addTodoWrapper}>
-            <TextInput style={style.addTodoInput} placeholder='add task' />
-            <TouchableOpacity style={style.addTodoBtn}>
+            <TextInput 
+              style={style.addTodoInput} 
+              placeholder='add task' 
+              onChangeText={(e) => {this.setState({note: e})}}
+              value={this.state.note}
+            />
+            <TouchableOpacity style={style.addTodoBtn} onPress={this.postTodo}>
               <Text style={style.logoutText}>+</Text>
             </TouchableOpacity>
           </View>
@@ -90,7 +125,13 @@ class Todos extends Component {
   }
 }
 
-export default Dashboard
+const mapStateToProps = state => ({
+  auth: state.auth,
+  todo: state.todo
+})
+const mapDispatchToProps = {getTodo, createTodo, pushTodo, logout}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard)
 
 const style = StyleSheet.create({
   fill: {

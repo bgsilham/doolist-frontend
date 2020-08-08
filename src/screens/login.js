@@ -1,6 +1,8 @@
   
 import React, {Component} from 'react';
-import {Text, View, Image, StyleSheet, Dimensions, TextInput, 
+import {connect} from 'react-redux'
+import {loginUser} from '../redux/action/auth'
+import {Text, View, StyleSheet, Dimensions, TextInput, 
         TouchableOpacity, Alert, ActivityIndicator}
         from 'react-native';
 
@@ -8,13 +10,31 @@ const deviceWidth = Dimensions.get('screen').width;
 const deviceHeight = Dimensions.get('screen').height;
 
 class login extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      email: '',
+      password: ''
+    }
+  }
   register = () => {
     this.props.navigation.navigate('register')
   }
   login = () => {
-    this.props.navigation.navigate('dashboard')
+    const dataSubmit = {
+      email: this.state.email,
+      password: this.state.password
+    }
+
+    this.props.loginUser(dataSubmit).then(() => {
+      this.props.navigation.navigate('dashboard')
+    }).catch(function () {
+      Alert.alert('Oops!', 'Wrong email or password :(')
+    })
+    
   }
   render() {
+    const {email, password} = this.state
     return (
       <>
         <View style={style.fill}>
@@ -27,13 +47,20 @@ class login extends Component {
           </View>
           <View style={style.formWrapper}>
             <Text style={style.formTitle}>Email</Text>
-            <TextInput style={style.formInput} placeholder='enter your email'/>
+            <TextInput 
+              style={style.formInput} 
+              placeholder='enter your email'
+              value={email}
+              onChangeText={(e) => {this.setState({email: e})}}
+            />
           </View>
           <View style={style.formWrapper}>
             <Text style={style.formTitle}>Password</Text>
             <TextInput 
               style={style.formInput} 
-              placeholder='enter your password' 
+              placeholder='enter your password'
+              value={password}
+              onChangeText={(e) => {this.setState({password: e})}}
               secureTextEntry
             />
           </View>
@@ -52,7 +79,12 @@ class login extends Component {
   }
 }
 
-export default login
+const mapStateToProps = state => ({
+  auth: state.auth
+})
+const mapDispatchToProps = {loginUser}
+
+export default connect(mapStateToProps, mapDispatchToProps)(login)
 
 const style = StyleSheet.create({
   fill: {

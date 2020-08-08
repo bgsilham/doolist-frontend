@@ -1,5 +1,7 @@
   
 import React, {Component} from 'react';
+import {connect} from 'react-redux'
+import {registerUser} from '../redux/action/auth'
 import {Text, View, Image, StyleSheet, Dimensions, TextInput, 
         TouchableOpacity, Alert, ActivityIndicator}
         from 'react-native';
@@ -8,10 +10,29 @@ const deviceWidth = Dimensions.get('screen').width;
 const deviceHeight = Dimensions.get('screen').height;
 
 class Register extends Component {
-  login = () => {
-    this.props.navigation.navigate('login')
+  constructor(props) {
+    super(props)
+    this.state = {
+      email: '',
+      password: ''
+    }
+  }
+  register = () => {
+    const dataSubmit = {
+      email: this.state.email,
+      password: this.state.password,
+    }
+
+    this.props.registerUser(dataSubmit).then(() => {
+      this.props.navigation.navigate('login')
+    }).catch(function () {
+      Alert.alert('Ooops!', 'Email has been taken :(')
+    })
   }
   render() {
+    
+    const {email, password} = this.state
+
     return (
       <>
         <View style={style.fill}>
@@ -20,20 +41,27 @@ class Register extends Component {
           </View>
           <View style={style.formWrapper}>
             <Text style={style.formTitle}>Email</Text>
-            <TextInput style={style.formInput} placeholder='enter your email'/>
+            <TextInput 
+              style={style.formInput} 
+              placeholder='enter your email'
+              value={email}
+              onChangeText={(e) => {this.setState({email: e})}}
+            />
           </View>
           <View style={style.formWrapper}>
             <Text style={style.formTitle}>Password</Text>
             <TextInput 
               style={style.formInput} 
-              placeholder='enter your password' 
+              placeholder='enter your password'
+              value={password}
+              onChangeText={(e) => {this.setState({password: e})}}
               secureTextEntry
             />
           </View>
-          <TouchableOpacity style={style.loginBtn} onPress={this.login}>
+          <TouchableOpacity style={style.loginBtn} onPress={this.register}>
             <Text style={style.loginText}>Register</Text>
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => this.props.navigation.navigate('login')}>
             <Text style={style.registerText}>I've already have an account</Text>
           </TouchableOpacity>
         </View>
@@ -42,7 +70,12 @@ class Register extends Component {
   }
 }
 
-export default Register
+const mapStateToProps = state => ({
+  auth: state.auth
+})
+const mapDispatchToProps = {registerUser}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Register)
 
 const style = StyleSheet.create({
   fill: {

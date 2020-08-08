@@ -1,5 +1,7 @@
   
 import React, {Component} from 'react';
+import {connect} from 'react-redux'
+import {deleteTodo, patchTodo} from '../redux/action/todo'
 import {Text, View, Image, StyleSheet, Dimensions, TextInput, 
         TouchableOpacity, Alert, ActivityIndicator}
         from 'react-native';
@@ -13,11 +15,28 @@ class Detail extends Component {
     this.state = {
       note: this.props.route.params._note,
       created_at: this.props.route.params._created_at,
+      id: this.props.route.params._id,
+      token: this.props.auth.token
     }
   }
-  login = () => {
-    this.props.navigation.navigate('login')
+  delete = () => {
+    const {id, token} = this.state
+
+    this.props.deleteTodo(id, token).then(() => {
+      this.props.navigation.navigate('dashboard')
+    })
   }
+  update = () => {
+    const {id, token} = this.state
+    const dataSubmit = {
+      note: this.state.note
+    }
+
+    this.props.patchTodo(dataSubmit, id, token).then(() => {
+      this.props.navigation.navigate('dashboard')
+    })
+  }
+
   render() {
     const {note, created_at} = this.state
     return (
@@ -33,10 +52,10 @@ class Detail extends Component {
           />
           <Text style={style.taskFooter}>Last modified {created_at}</Text>
           <View style={style.btnWrapper}>
-            <TouchableOpacity style={style.btnEdit}>
+            <TouchableOpacity style={style.btnEdit} onPress={this.update}>
               <Text style={style.btnText}>EDIT</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={style.btnDelete}>
+            <TouchableOpacity style={style.btnDelete} onPress={this.delete}>
               <Text style={style.btnText}>DELETE</Text>
             </TouchableOpacity>
           </View>
@@ -46,7 +65,13 @@ class Detail extends Component {
   }
 }
 
-export default Detail
+const mapStateToProps = state => ({
+  auth: state.auth,
+  todo: state.todo
+})
+const mapDispatchToProps = {deleteTodo, patchTodo}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Detail)
 
 const style = StyleSheet.create({
   fill: {
