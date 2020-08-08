@@ -64,9 +64,15 @@ class login extends Component {
               secureTextEntry
             />
           </View>
-          <TouchableOpacity style={style.loginBtn} onPress={this.login}>
-            <Text style={style.loginText}>Login</Text>
-          </TouchableOpacity>
+          {this.props.auth.isLoading ? (
+            <View style={style.loginBtn} >
+              <ActivityIndicator size='small' color='white' />
+            </View>
+          ):(
+            <TouchableOpacity style={style.loginBtn} onPress={this.login}>
+              <Text style={style.loginText}>Login</Text>
+            </TouchableOpacity>
+          )}
           <View style={style.titleWrapper}>
             <Text style={style.subtitle2}>Don't have account yet?</Text>
           </View>

@@ -58,9 +58,15 @@ class Register extends Component {
               secureTextEntry
             />
           </View>
-          <TouchableOpacity style={style.loginBtn} onPress={this.register}>
-            <Text style={style.loginText}>Register</Text>
-          </TouchableOpacity>
+          {this.props.auth.isLoadingRegister ? (
+            <View style={style.loginBtn}>
+              <ActivityIndicator size='small' color='white' />
+            </View>
+          ):(
+            <TouchableOpacity style={style.loginBtn} onPress={this.register}>
+              <Text style={style.loginText}>Register</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity onPress={() => this.props.navigation.navigate('login')}>
             <Text style={style.registerText}>I've already have an account</Text>
           </TouchableOpacity>

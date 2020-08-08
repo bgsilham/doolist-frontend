@@ -38,7 +38,7 @@ const auth = (state=initialState, action) => {
     case 'REGISTER_PENDING': {
       return {
         ...state,
-        isLoading: true,
+        isLoadingRegister: true,
         isError: false
       }
     }
@@ -54,7 +54,8 @@ const auth = (state=initialState, action) => {
       return {
         ...state,
         isLoadingRegister: false,
-        isError: false
+        isError: false,
+        isLoadingRegister: false
       }
     }
     case 'LOGOUT': {
