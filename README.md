@@ -21,7 +21,7 @@
 - Search
 
 
-**Get started**
+**Installation**
 
 1. Open your CLI
 2. Clone this repo
