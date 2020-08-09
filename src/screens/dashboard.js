@@ -7,8 +7,7 @@ import {logout} from '../redux/action/auth'
 import {Text, View, FlatList, StyleSheet, Dimensions, TextInput, 
         TouchableOpacity, Alert, ActivityIndicator}
         from 'react-native';
-import { getGeneratedNameForNode } from 'typescript';
-const URL = 'http://192.168.56.1:8100'
+const URL = 'http://54.144.221.209:8100/'
 const deviceWidth = Dimensions.get('screen').width;
 const deviceHeight = Dimensions.get('screen').height;
 
