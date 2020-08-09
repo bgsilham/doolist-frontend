@@ -31,8 +31,7 @@ git clone https://github.com/bgsilham/antoo-frontend.git
 ```
 
 3. Open the folder and type `npm install` for install dependencies.
-4. Connect with [`Backend RESTful API`](https://github.com/bgsilham/doolist-backend)
-5. Run expo project `expo start`
+4. Run expo project `expo start`
 
 
 **Crafted with love** by [Ilham Bagas Saputra](https://instagram.com/ilhambagasaputra)
